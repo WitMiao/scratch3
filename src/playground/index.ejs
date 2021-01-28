@@ -25,7 +25,10 @@
         }
       },
       menuBar: {
-        color: 'hsla(215, 100%, 65%, 1)', //菜单栏颜色
+        //菜单栏样式
+        style: {
+          background: 'hsla(215, 100%, 65%, 1)',
+        },
         //新建按钮
         newButton:{
           show: true,
@@ -53,7 +56,11 @@
         },
         //教程按钮
         helpButton:{
-          show: true
+          show: true,
+          handleBefore:()=>{
+            console.log("显示自己的教程")
+            return true
+          }
         },
         //我的物品按钮
         myStuff:{
@@ -69,29 +76,54 @@
             //弹出登录框等操作
             console.log("点击头像")
           }
-        }
+        },
+        customButtons: [
+          {
+            buttonName: '分享',
+            style:{
+              color: 'white',
+              background: 'hsla(30, 100%, 55%, 1)',
+            },
+            handleClick:()=>{
+              console.log("自定义按钮1");
+              console.log('分享按钮')
+              window.scratch.getProjectCover(cover => {
+                //TODO 获取到作品截图
+                console.log(cover)
+              })
+              window.scratch.getProjectFile(file => {
+                //TODO 获取到项目文件
+                console.log(file)
+              })
+              // 获取到项目名
+              var projectName = window.scratch.getProjectName()
+              console.log(projectName);
+            }
+          },
+          {
+            buttonName: '自定义按钮2',
+            style: {
+              color: 'white',
+              background: 'hsl(271deg 89% 70%)',
+            },
+            handleClick:()=>{
+              console.log("自定义按钮2");
+            }
+          },
+          //可继续新增按钮
+        ]
       }, 
+      //弃用
       shareButton: {
-        show: true,
+        show: false,
         buttonName: "分享",
         handleClick: () => {
           //点击分享按钮
-          console.log('分享按钮')
-          window.scratch.getProjectCover(cover => {
-            //TODO 获取到作品截图
-            console.log(cover)
-          })
-          window.scratch.getProjectFile(file => {
-            //TODO 获取到项目文件
-            console.log(file)
-          })
-          // 获取到项目名
-          var projectName = window.scratch.getProjectName()
-          console.log(projectName);
         }
       },
-      profileButton: {
-        show: true,
+      //弃用
+      profileButton: { 
+        show: false,
         buttonName: "我的作品",
         handleClick:()=>{
           //点击profile按钮
@@ -99,13 +131,40 @@
       },
       blocks:{
         scale: 0.8, // 积木缩放比例
+        // 隐藏分类
+        // 分类代码:motion、looks、sound、events、control、sensing、operators、variables、myBlocks
+        // 如需动态隐藏显示分类或积木，修改此配置后需手动执行 window.vm.emitWorkspaceUpdate()
+        hideCatagorys:[], 
+        //隐藏积木
+        /**积木代码：
+          motion_movesteps  motion_turnright  motion_turnleft  motion_goto  motion_gotoxy  motion_glideto
+          motion_glidesecstoxy  motion_pointindirection  motion_pointtowards  motion_changexby  motion_setx
+          motion_changeyby  motion_sety  motion_ifonedgebounce  motion_setrotationstyle  motion_xposition  motion_yposition  motion_direction
+
+          looks_sayforsecs  looks_say  looks_thinkforsecs  looks_think  looks_switchbackdropto  looks_switchbackdroptoandwait  looks_nextbackdrop
+          looks_switchcostumeto  looks_nextcostume  looks_switchbackdropto  looks_nextbackdrop  looks_changesizeby  looks_setsizeto  looks_changeeffectby
+          looks_seteffectto  looks_cleargraphiceffects  looks_show  looks_hide  looks_gotofrontback  looks_goforwardbackwardlayers  looks_backdropnumbername
+          looks_costumenumbername  looks_backdropnumbername  looks_size
+
+          sound_playuntildone  sound_play  sound_stopallsounds  sound_changeeffectby  sound_seteffectto  sound_cleareffects
+          sound_changevolumeby  sound_setvolumeto  sound_volume
+
+          event_whenflagclicked  event_whenkeypressed  event_whenstageclicked  event_whenthisspriteclicked  event_whenbackdropswitchesto
+          event_whengreaterthan  event_whenbroadcastreceived  event_broadcast  event_broadcastandwait
+
+          control_wait  control_repeat  control_forever  control_if  control_if_else  control_wait_until  control_repeat_until  control_stop
+          control_create_clone_of  control_start_as_clone  control_create_clone_of  control_delete_this_clone  
+
+          sensing_touchingobject  sensing_touchingcolor  sensing_coloristouchingcolor  sensing_distanceto  sensing_askandwait  sensing_answer
+          sensing_keypressed  sensing_mousedown  sensing_mousex  sensing_mousey  sensing_setdragmode  sensing_loudness  sensing_timer  sensing_resettimer
+          sensing_of  sensing_current  sensing_dayssince2000  sensing_username
+
+          operator_add  operator_subtract  operator_multiply  operator_divide  operator_random  operator_gt  operator_lt  operator_equals  operator_and
+          operator_or   operator_not  operator_join  operator_letter_of  operator_length  operator_contains  operator_mod  operator_round  operator_mathop
+        */
+        hideBlocks:[],
       },
       stageArea:{ //舞台设置
-        scale: 1, //舞台缩放比例
-        width: 480,
-        height: 360,
-        showControl: false, //是否显示舞台区控制按钮
-        showLoading: false, //是否显示Loading
         fullscreenButton:{ //全屏按钮
           show: true,
           handleBeforeSetStageUnFull(){ //退出全屏前的操作
@@ -138,12 +197,16 @@
 
       },
       handleDefaultProjectLoaded:() => {
-        //默认作品加载完毕，一般在这里控制项目加载
-        // window.scratch.setProjectName("默认项目")
-        //  window.scratch.loadProject("/project.sb3", () => {
-        //     console.log("项目加载完毕")
-        //     window.scratch.setProjectName("默认项目")
-        //  })
+        //默认作品加载完毕，可以在这里控制项目加载
+         window.scratch.loadProject("/project.sb3", (e) => {
+          if(e === undefined){
+            console.log("项目加载完毕")
+            window.scratch.setProjectName("默认项目")
+          }else{
+            console.log("项目加载失败")
+            console.log(e);
+          }  
+         })
       },
       //默认项目地址,不需要修请删除本配置项
       defaultProjectURL: "./static/project.sb3",
